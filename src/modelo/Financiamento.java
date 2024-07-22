@@ -1,19 +1,17 @@
 package modelo;
+import java.io.Serializable;
 
-public class Financiamento {
+public abstract class Financiamento implements Serializable {
 
-    // Atributos da classe
-    private double valorImovel;
-    private int prazoFinanciamento;
-    private double taxaJurosAnual;
+    // atributos da classe
+    protected double valorImovel;
+    protected int prazoFinanciamento;
+    protected double taxaJurosAnual;
 
-    // Construtor
+    // construtor
     public Financiamento(double valorImovel, int prazoFinanciamentoAnos, double taxaJurosAnual) {
-        if (taxaJurosAnual < 10) {
-            throw new IllegalArgumentException("A taxa inserida é inferior à porcentagem da qual aceitamos (10 a 15%)");
-        }
-        if (taxaJurosAnual > 15) {
-            throw new IllegalArgumentException("A taxa de juros é superior à porcentagem da qual aceitamos (10 a 15%)");
+        if (taxaJurosAnual < 10 || taxaJurosAnual > 15) {
+            throw new IllegalArgumentException("A taxa de juros deve estar entre 10% e 15%. Taxa fornecida: " + taxaJurosAnual);
         }
 
         this.valorImovel = valorImovel;
@@ -21,7 +19,7 @@ public class Financiamento {
         this.taxaJurosAnual = taxaJurosAnual;
     }
 
-    // Métodos getters
+    // métodos getters
     public double getValorImovel() {
         return valorImovel;
     }
@@ -34,14 +32,22 @@ public class Financiamento {
         return taxaJurosAnual;
     }
 
-    // metodos para calculo do financiamento
-    public double calcularPagamentoMensal() {
-        double taxaJurosMensal = taxaJurosAnual / 12 / 100;
+    // Método para obter o valor dos juros mensais
+    public double getJurosMensal() {
+        double taxaJurosMensal = taxaJurosAnual / 12 / 100.0;
         int prazoFinanciamentoMeses = prazoFinanciamento * 12;
-        return (this.valorImovel / (this.prazoFinanciamento * 12)) * (1 + (this.taxaJurosAnual / 12));
+        return valorImovel * taxaJurosMensal / (1 - Math.pow(1 + taxaJurosMensal, -prazoFinanciamentoMeses));
+    }
+
+    // Métodos para cálculo do financiamento
+    public double calcularPagamentoMensal() {
+        double taxaJurosMensal = taxaJurosAnual / 12 / 100.0;
+        int prazoFinanciamentoMeses = prazoFinanciamento * 12;
+        return (this.valorImovel / prazoFinanciamentoMeses) * (1 + taxaJurosMensal);
     }
 
     public double calcularTotalPagamento() {
         return calcularPagamentoMensal() * prazoFinanciamento * 12;
     }
 }
+
